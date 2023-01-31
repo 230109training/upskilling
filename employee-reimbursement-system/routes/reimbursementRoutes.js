@@ -101,47 +101,55 @@ router.post('/', async (req, res) => {
 
 // PATCH /reimbursements/:id/status
 router.patch('/:id/status', async (req, res) => {
-    const token = req.headers.authorization.split(" ")[1];
+    try {
+        const token = req.headers.authorization.split(" ")[1];
     
-    // Payload contains username and role
-    const payload = await jwtUtil.verifyTokenAndReturnPayload(token);
-
-    if (payload.role === 'finance_manager') {
-        // Note: reimbursements must already exist to be updated AND the reimbursement must be pending
-        // Make sure to retrieve the reimbursement and check for these conditions before proceeding
-        const { Item } = await reimbDao.getReimbursementById(req.params.id);
-        if (Item) { // if Item is defined
-            if (Item.status === 'pending') {
-                if (req.body.status === 'approved' || req.body.status === 'denied') {
-                    reimbDao.updateReimbursementStatus(req.params.id, req.body.status);
-
-                    res.send({
-                        "message": "Status of reimbursement updated successfully!"
-                    });
+        // Payload contains username and role
+        const payload = await jwtUtil.verifyTokenAndReturnPayload(token);
+    
+        if (payload.role === 'finance_manager') {
+            // Note: reimbursements must already exist to be updated AND the reimbursement must be pending
+            // Make sure to retrieve the reimbursement and check for these conditions before proceeding
+            const { Item } = await reimbDao.getReimbursementById(req.params.id);
+            if (Item) { // if Item is defined
+                if (Item.status === 'pending') {
+                    if (req.body.status === 'approved' || req.body.status === 'denied') {
+                        reimbDao.updateReimbursementStatus(req.params.id, req.body.status);
+    
+                        res.send({
+                            "message": "Status of reimbursement updated successfully!"
+                        });
+                    } else {
+                        res.statusCode = 400;
+                        res.send({
+                            "message": "Status is invalid"
+                        })
+                    }
                 } else {
                     res.statusCode = 400;
                     res.send({
-                        "message": "Status is invalid"
-                    })
+                        "message": "Cannot update reimbursement status that is not pending"
+                    });
                 }
             } else {
-                res.statusCode = 400;
+                res.statusCode = 404; // 404 not found
                 res.send({
-                    "message": "Cannot update reimbursement status that is not pending"
-                });
+                    "message": `Reimbursement with id ${req.params.id} does not exist`
+                })
             }
         } else {
-            res.statusCode = 404; // 404 not found
+            res.statusCode = 401;
             res.send({
-                "message": `Reimbursement with id ${req.params.id} does not exist`
-            })
+                "message": "Must be finance_manager to update reimbursement status"
+            });
         }
-    } else {
-        res.statusCode = 401;
+    } catch(err) {
+        res.statusCode = 500;
         res.send({
-            "message": "Must be finance_manager to update reimbursement status"
+            "message": err.message
         });
     }
+    
 });
 
 module.exports = router;

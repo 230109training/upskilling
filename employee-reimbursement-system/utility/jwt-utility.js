@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const Promise = require('bluebird');
 
 function createToken(username, role) {
-    return jwt.sign({ "username": username, "role": role }, 'thisisthesecretpasswordusedtosignthetoken');
+    return jwt.sign({ "username": username, "role": role }, process.env.JWT_SIGNING_SECRET);
 }
 
 // function verifyTokenAndReturnPayload(token) {
@@ -23,7 +23,7 @@ function verifyTokenAndReturnPayload(token) {
     // of the function being modified must be a callback function of the format (err, data) => {}
     jwt.verify = Promise.promisify(jwt.verify);
 
-    return jwt.verify(token, 'thisisthesecretpasswordusedtosignthetoken');
+    return jwt.verify(token, process.env.JWT_SIGNING_SECRET);
 }
 
 module.exports = {

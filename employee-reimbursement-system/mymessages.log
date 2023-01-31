@@ -69,3 +69,9 @@
 {"level":"info","message":"POST request received at endpoint /users","timestamp":"2023-01-31T21:49:26.780Z"}
 {"level":"info","message":"POST request received at endpoint /users","timestamp":"2023-01-31T21:49:27.997Z"}
 {"level":"info","message":"POST request received at endpoint /users","timestamp":"2023-01-31T21:49:31.387Z"}
+{"level":"info","message":"PATCH request received at endpoint /reimbursements/64e474c9-513a-4e76-aede-73e3e321ad7b/status","timestamp":"2023-01-31T21:59:18.860Z"}
+{"level":"info","message":"PATCH request received at endpoint /reimbursements/64e474c9-513a-4e76-aede-73e3e321ad7b/status","timestamp":"2023-01-31T22:00:25.305Z"}
+{"level":"info","message":"POST request received at endpoint /users","timestamp":"2023-01-31T22:00:28.472Z"}
+{"level":"info","message":"POST request received at endpoint /reimbursements","timestamp":"2023-01-31T22:00:30.755Z"}
+{"level":"info","message":"POST request received at endpoint /login","timestamp":"2023-01-31T22:00:42.226Z"}
+{"level":"info","message":"PATCH request received at endpoint /reimbursements/64e474c9-513a-4e76-aede-73e3e321ad7b/status","timestamp":"2023-01-31T22:00:50.952Z"}
