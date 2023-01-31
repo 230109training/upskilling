@@ -1,4 +1,11 @@
+require('dotenv').config() // load the environment variables from .env
 const AWS = require('aws-sdk');
+
+/*
+    By convention, AWS SDK will automatically look for the following environment variables
+    1. AWS_ACCESS_KEY_ID
+    2. AWS_SECRET_ACCESS_KEY
+*/
 
 AWS.config.update({
     region: 'us-east-1'
@@ -113,6 +120,11 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 // await: a keyword that can be only be used in async functions. It is used to extract the data from a successfully resolved
 // promise (similar to .then())
 async function myAsyncFunction() {
+    console.log('Async function started');
+
+    /*
+        Put
+    */
     const params = {
         TableName: 'grocery_items',
         Item: {
@@ -123,10 +135,16 @@ async function myAsyncFunction() {
         }
     };
 
-    // Pause the function until the promise is done resolving (or rejecting)
+    // Await: Pause the function until the promise is done resolving (or rejecting)
+    // When the function is paused, it will continue running other code outside of the async function
+    // When all of that code is done running, then it will jump back into the async function when the promise
+    // is resolved
     const data = await documentClient.put(params).promise();
     console.log(data); // {}
 
+    /*
+        Get
+    */
     const params2 = {
         TableName: 'grocery_items',
         Key: {
@@ -136,6 +154,93 @@ async function myAsyncFunction() {
 
     const data2 = await documentClient.get(params2).promise();
     console.log(data2.Item);
+
+
+    /*
+        Delete
+    */
+    const params3 = {
+        TableName: 'grocery_items',
+        Key: {
+            grocery_item_id: 'testing123'
+        }
+    }
+
+    const data3 = await documentClient.delete(params3).promise();
+    console.log(data3); // {}
+
+    /*
+        Update: used to partially update some attributes for a single item
+    */
+    const params5 = {
+        TableName: 'grocery_items',
+        Key: {
+            grocery_item_id: 'abc125'
+        },
+        UpdateExpression: 'set #p = :v',
+        ExpressionAttributeNames: { // The purpose of using placeholders is to get around the problem of "reserved keywords"
+            "#p": "price"
+        },
+        ExpressionAttributeValues: {
+            ":v": 7.57
+        }
+    }
+
+    await documentClient.update(params5).promise();
+
+    /*
+        Query: efficient O(1)
+    */
+    // Querying on a table
+    const params6 = {
+        TableName: 'notes',
+        KeyConditionExpression: "#i = :val",
+        ExpressionAttributeNames: {
+            "#i": "user_id"
+        },
+        ExpressionAttributeValues: {
+            ":val": "abc1"
+        }
+    }
+
+    const data6 = await documentClient.query(params6).promise();
+    console.log(data6);
+    console.log(data6.Items);
+
+    // Query on an index
+    const params8 = {
+        TableName: 'grocery_items',
+        IndexName: 'category-index',
+        KeyConditionExpression: "#i = :val",
+        ExpressionAttributeNames: {
+            "#i": "category"
+        },
+        ExpressionAttributeValues: {
+            ":val": "meat" // If this were a "foreign key", then the "category" attribute belonging to the Global secondary
+            // index can be queried
+        }
+    }
+
+    let data8 = await documentClient.query(params8).promise();
+    console.log(data8);
+
+    /*
+        Scan: inefficient O(n)
+    */
+    const params7 = {
+        TableName: 'notes',
+        FilterExpression: '#i = :val',
+        ExpressionAttributeNames: {
+            "#i": "user_id"
+        },
+        ExpressionAttributeValues: {
+            ":val": "abc1"
+        }
+    }
+
+    const data7 = await documentClient.scan(params7).promise();
+    console.log(data7);
 }
 
 myAsyncFunction();
+console.log('This will print first');
